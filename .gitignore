@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.egg-info/
+data/
+library/
+*.exe
+*.pdb
+*.o
+*.dll
+*.so
+*.dylib
+*.rmeta
+.pytest_cache/
