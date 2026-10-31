@@ -58,7 +58,7 @@ def bridge_signal(signal, window_size=64):
         w = sig[start:start + window_size]
         amp = np.abs(w).mean()
         vel = np.abs(np.diff(w)).mean()
-        dc = abs(w.mean())
+        mean_level = abs(w.mean())
         energy = np.mean(w ** 2)
         phase = abs(np.mean(w > 0) - 0.5) * 2
         accel = np.abs(np.diff(w, n=2)).mean() if len(w) > 2 else 0
@@ -70,7 +70,7 @@ def bridge_signal(signal, window_size=64):
         mi = fft_mag[t + 1:2 * t + 1].sum()
         hi = fft_mag[2 * t + 1:].sum()
         sd = max(lo, mi, hi) / (lo + mi + hi + 1e-10)
-        out.append([amp, vel, dc, energy, phase, accel, zc, sd])
+        out.append([amp, vel, mean_level, energy, phase, accel, zc, sd])
     return np.array(out) if out else np.zeros((0, 8))
 
 

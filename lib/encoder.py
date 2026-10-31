@@ -108,7 +108,7 @@ class TorusPath:
         Returns one entropy value per window position. Where entropy
         stabilizes, the coordinate functions have harmonized — the
         text's grammatical rhythm has settled. Where it keeps moving,
-        the winding is still irrational.
+        the winding modes are still primitive (coprime).
         """
         import math
         n = len(self.components)

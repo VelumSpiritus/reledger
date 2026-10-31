@@ -24,12 +24,12 @@ COMPONENT_NAMES = [
 COMPONENT_MEANINGS = {
     'WHAT': 'magnitude / amplitude',
     'HOW': 'rate of change / velocity',
-    'WHO': 'baseline identity / DC offset',
+    'WHO': 'baseline identity / mean level',
     'HOWMUCH': 'energy / power',
     'WHEREWHEN': 'phase position / timing',
     'WHY': 'curvature / acceleration',
-    'WHETHER': 'oscillation pattern / zero-crossings',
-    'WHICH': 'frequency content / spectral shape',
+    'WHETHER': 'oscillation pattern / sign changes',
+    'WHICH': 'frequency content / band shape',
 }
 
 COMPONENT_GRAMMAR = {

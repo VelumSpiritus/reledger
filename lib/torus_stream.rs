@@ -66,7 +66,7 @@ fn gcd(mut a: usize, mut b: usize) -> usize {
 }
 
 struct Analysis {
-    dc_fraction: f64,
+    mean_fraction: f64,
     coprime_fraction: f64,
     effective_modes: f64,
     mode_diversity: f64,
@@ -76,7 +76,7 @@ struct Analysis {
 fn analyze(spectrum: &[C], w: usize, h: usize) -> Analysis {
     let mag_sq: Vec<f64> = spectrum.iter().map(|c| c.mag_sq()).collect();
     let total: f64 = mag_sq.iter().sum();
-    let dc = mag_sq[0];
+    let mean_energy = mag_sq[0];
 
     let mut coprime = 0.0f64;
     let half_w = w / 2 + 1;
@@ -100,7 +100,7 @@ fn analyze(spectrum: &[C], w: usize, h: usize) -> Analysis {
     let max_m = (w * h) as f64;
 
     Analysis {
-        dc_fraction: if total > 1e-12 { dc / total } else { 0.0 },
+        mean_fraction: if total > 1e-12 { mean_energy / total } else { 0.0 },
         coprime_fraction: if total > 1e-12 { coprime / total } else { 0.0 },
         effective_modes: eff,
         mode_diversity: eff / max_m,
@@ -161,13 +161,13 @@ fn main() {
         prior = Some(spectrum);
 
         if has_delta {
-            write!(out, "{{\"frame\":{},\"dc\":{:.4},\"coprime\":{:.4},\"modes\":{:.2},\"diversity\":{:.6},\"energy\":{:.0},\"delta_sum\":{:.0},\"delta_max\":{:.0},\"delta_mean\":{:.2}}}\n",
-                frame_n, a.dc_fraction, a.coprime_fraction,
+            write!(out, "{{\"frame\":{},\"mean\":{:.4},\"coprime\":{:.4},\"modes\":{:.2},\"diversity\":{:.6},\"energy\":{:.0},\"delta_sum\":{:.0},\"delta_max\":{:.0},\"delta_mean\":{:.2}}}\n",
+                frame_n, a.mean_fraction, a.coprime_fraction,
                 a.effective_modes, a.mode_diversity, a.total_energy,
                 d_sum, d_max, d_mean).ok();
         } else {
-            write!(out, "{{\"frame\":{},\"dc\":{:.4},\"coprime\":{:.4},\"modes\":{:.2},\"diversity\":{:.6},\"energy\":{:.0}}}\n",
-                frame_n, a.dc_fraction, a.coprime_fraction,
+            write!(out, "{{\"frame\":{},\"mean\":{:.4},\"coprime\":{:.4},\"modes\":{:.2},\"diversity\":{:.6},\"energy\":{:.0}}}\n",
+                frame_n, a.mean_fraction, a.coprime_fraction,
                 a.effective_modes, a.mode_diversity, a.total_energy).ok();
         }
         out.flush().ok();

@@ -159,15 +159,15 @@ pub fn sigma_omega(spectrum: &[Complex]) -> (Vec<f64>, Vec<f64>) {
 ///   Low = energy in harmonic multiples of simpler patterns.
 ///
 /// mode_diversity: effective_modes / max_modes. The actual complexity
-///   measure — energy spread across many modes approaches irrational
-///   winding (dense orbit, never closing). High diversity = complex.
+///   measure — energy spread across many modes, no common period
+///   (dense orbit, never closing). High diversity = complex.
 ///
-/// dc_fraction: energy in the (0,0) mode = the constant brightness.
+/// mean_fraction: energy in the (0,0) mode — the signal mean.
 ///
 /// effective_modes: entropy-based count of how many spatial frequencies
 ///   carry meaningful energy.
 pub struct WindingAnalysis {
-    pub dc_fraction: f64,
+    pub mean_fraction: f64,
     pub coprime_fraction: f64,
     pub effective_modes: f64,
     pub max_modes: usize,
@@ -182,7 +182,7 @@ fn gcd(mut a: usize, mut b: usize) -> usize {
 
 pub fn winding_analysis(spectrum: &[Complex], width: usize, height: usize) -> WindingAnalysis {
     let total_energy: f64 = spectrum.iter().map(|c| c.magnitude().powi(2)).sum();
-    let dc_energy = spectrum[0].magnitude().powi(2);
+    let mean_energy = spectrum[0].magnitude().powi(2);
 
     let mut coprime_energy = 0.0f64;
     let half_w = width / 2 + 1;
@@ -210,7 +210,7 @@ pub fn winding_analysis(spectrum: &[Complex], width: usize, height: usize) -> Wi
     let max_modes = width * height;
 
     WindingAnalysis {
-        dc_fraction: if total_energy > 1e-12 { dc_energy / total_energy } else { 0.0 },
+        mean_fraction: if total_energy > 1e-12 { mean_energy / total_energy } else { 0.0 },
         coprime_fraction: if total_energy > 1e-12 { coprime_energy / total_energy } else { 0.0 },
         effective_modes,
         max_modes,
@@ -287,14 +287,14 @@ mod tests {
     }
 
     #[test]
-    fn constant_image_is_dc_only() {
+    fn constant_image_is_mean_only() {
         let w = 4;
         let h = 4;
         let pixels = vec![128u8; w * h];
         let spectrum = torus_fft_2d(&pixels, w, h);
         let analysis = winding_analysis(&spectrum, w, h);
-        assert!(analysis.dc_fraction > 0.99,
-            "constant image should be nearly all DC, got {}", analysis.dc_fraction);
+        assert!(analysis.mean_fraction > 0.99,
+            "constant image should be nearly all mean, got {}", analysis.mean_fraction);
     }
 
     #[test]
@@ -360,10 +360,10 @@ fn main() {
 
     println!("Torus Eye — frame {}", frame.frame_number);
     println!("  total_energy:    {:.2}", frame.analysis.total_energy);
-    println!("  dc_fraction:     {:.4}", frame.analysis.dc_fraction);
+    println!("  mean_fraction:   {:.4}", frame.analysis.mean_fraction);
     println!("  coprime_fraction:{:.4}", frame.analysis.coprime_fraction);
     println!("  effective_modes: {:.2}", frame.analysis.effective_modes);
     println!("  mode_diversity:  {:.4}", frame.analysis.mode_diversity);
-    println!("  sigma[0] (DC):   {:.2}", frame.sigma[0]);
-    println!("  omega[0] (DC):   {:.4}", frame.omega[0]);
+    println!("  sigma[0] (mean): {:.2}", frame.sigma[0]);
+    println!("  omega[0] (mean): {:.4}", frame.omega[0]);
 }

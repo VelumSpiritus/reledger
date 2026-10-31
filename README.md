@@ -52,7 +52,7 @@ text → tokenize → classify role → 8 component counts per window → (N, 8)
 ### Signal bridge
 
 ```
-signal → window → [amplitude, velocity, DC, energy, phase, accel, ZC, spectral] → (N, 8)
+signal → window → [amplitude, velocity, mean, energy, phase, acceleration, sign-changes, band-shape] → (N, 8)
 ```
 
 ## The 8 axes
@@ -61,12 +61,12 @@ signal → window → [amplitude, velocity, DC, energy, phase, accel, ZC, spectr
 |---|---|---|
 | WHAT | content nouns, connective conjunctions (and/also), contrastive (but/however) | amplitude |
 | HOW | auxiliaries (is/was/can/must), verbs by tense (-ed past, -ing progressive) | velocity |
-| WHO | pronouns: subject (I/she), possessive (my/his), object (me/him), reflexive (myself) | DC offset |
+| WHO | pronouns: subject (I/she), possessive (my/his), object (me/him), reflexive (myself) | mean level |
 | HOWMUCH | quantifiers (many/few/all/some/every), numbers, negator (none) | energy |
 | WHEREWHEN | location prepositions (in/on/at), temporal conjunctions (when/before/after) | phase |
 | WHY | causal conjunctions (because/therefore/since/hence/so/thus) | acceleration |
-| WHETHER | conditionals (if/unless), punctuation (. ! ? , ;), negation (not) | zero-crossings |
-| WHICH | selective conjunctions (or/either/neither), interrogative (which) | spectral shape |
+| WHETHER | conditionals (if/unless), punctuation (. ! ? , ;), negation (not) | sign changes |
+| WHICH | selective conjunctions (or/either/neither), interrogative (which) | band shape |
 
 The engine reports all 8 after genre discovery — which axes separate
 the genres and by how much, with the grammatical grounding for each.

@@ -108,7 +108,7 @@ def spectral_profile(points: list[tuple[float, float]]) -> dict:
 
     n = len(padded1)
 
-    # Extract top frequencies (skip DC, take first half)
+    # Extract top frequencies (skip mean, take first half)
     def top_freqs(fft_result, count=5):
         mags = [(abs(fft_result[k]) / n, k) for k in range(1, n // 2)]
         mags.sort(reverse=True)
