@@ -77,7 +77,7 @@ def bridge_signal(signal, window_size=64):
 def bridge_text(text, window_size=50):
     """Text bridge via grammatical classification.
 
-    Counts occurrences of each of the 8 interrogative components
+    Counts occurrences of each of the 8 feature channels
     within sliding windows of tokens. Uses the grammar module
     for classification.
 

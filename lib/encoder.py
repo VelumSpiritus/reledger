@@ -2,7 +2,7 @@
 
 This is the bridge. It composes:
     1. Tokenize text into words
-    2. Classify each token by grammatical role (→ interrogative component)
+    2. Classify each token by grammatical role (→ structural component)
     3. Map to torus coordinates (θ₁, θ₂)
     4. Analyze winding numbers and spectral profile
 
@@ -62,8 +62,6 @@ class TorusPath:
         """Count transitions between consecutive (component, phase) states.
 
         Each state is the component name. Returns {(from, to): count}.
-        The self-transition (A -> A) is the reflexive: the same instrument
-        meeting itself. The cross-transition (A -> B) is the projected other.
         """
         counts: dict[tuple[str, str], int] = {}
         for i in range(len(self.components) - 1):
@@ -72,11 +70,7 @@ class TorusPath:
         return counts
 
     def transition_entropy(self) -> float:
-        """Shannon entropy of the transition distribution.
-
-        High entropy = diverse transitions (the self meets many others).
-        Low entropy = repetitive patterns (the self keeps meeting the same).
-        """
+        """Shannon entropy of the transition distribution."""
         import math
         trans = self.transition_matrix()
         total = sum(trans.values())
@@ -90,11 +84,7 @@ class TorusPath:
         return ent
 
     def self_transition_rate(self) -> float:
-        """Fraction of transitions where the same component repeats.
-
-        The reflexive rate: how often the instrument meets itself
-        rather than projecting to an other.
-        """
+        """Fraction of transitions where the same component repeats."""
         trans = self.transition_matrix()
         total = sum(trans.values())
         if total == 0:
@@ -103,13 +93,7 @@ class TorusPath:
         return self_count / total
 
     def windowed_entropy(self, window: int = 50) -> list[float]:
-        """Transition entropy computed over a sliding window.
-
-        Returns one entropy value per window position. Where entropy
-        stabilizes, the coordinate functions have harmonized — the
-        text's grammatical rhythm has settled. Where it keeps moving,
-        the winding modes are still primitive (coprime).
-        """
+        """Transition entropy computed over a sliding window."""
         import math
         n = len(self.components)
         if n < 2 or window < 2:
@@ -130,12 +114,7 @@ class TorusPath:
         return results
 
     def harmonization_curve(self, window: int = 50) -> list[float]:
-        """Distance from local rhythm to global rhythm at each position.
-
-        Measures |windowed_entropy - global_entropy| normalized by the
-        global entropy. Values near 0 mean the local window matches the
-        text's overall rhythm; values near 1 mean it diverges.
-        """
+        """Distance from local rhythm to global rhythm at each position."""
         global_ent = self.transition_entropy()
         if global_ent == 0:
             return []
@@ -143,11 +122,9 @@ class TorusPath:
                 for w in self.windowed_entropy(window)]
 
     def rhythm_stability(self, window: int = 50) -> float:
-        """How stable the grammatical rhythm is through the text.
+        """How stable the structural rhythm is through the text.
 
-        1.0 = perfectly stable (windowed entropy never varies).
-        0.0 = maximally unstable.
-        Computed as 1 - coefficient of variation of windowed entropy.
+        1.0 = perfectly stable. 0.0 = maximally unstable.
         """
         import statistics
         ents = self.windowed_entropy(window)
@@ -162,9 +139,8 @@ class TorusPath:
     def harmonization_rate(self, window: int = 50) -> float:
         """How quickly the rhythm harmonizes from the text's opening.
 
-        Measures the position (as fraction of text length) where the
+        Returns the position (as fraction of text length) where the
         harmonization curve first drops below 0.1 (within 10% of global).
-        Returns 1.0 if it never harmonizes; returns 0.0 if it starts harmonized.
         """
         curve = self.harmonization_curve(window)
         if not curve:
@@ -202,13 +178,7 @@ def encode(text: str) -> TorusPath:
 
 
 def compare(text_a: str, text_b: str) -> dict:
-    """Compare two texts by their grammatical structure on the torus.
-
-    Returns both the grammatical distance (component fractions, phase
-    fractions, winding rates — the features that separate genres) and
-    the spectral profile comparison. The grammatical distance is the
-    conjunction: two profiles placed side by side.
-    """
+    """Compare two texts by their structural profile on the torus."""
     path_a = encode(text_a)
     path_b = encode(text_b)
 

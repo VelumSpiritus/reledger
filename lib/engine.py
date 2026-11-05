@@ -17,30 +17,19 @@ from collections import Counter
 import numpy as np
 
 COMPONENT_NAMES = [
-    'WHAT', 'HOW', 'WHO', 'HOWMUCH',
-    'WHEREWHEN', 'WHY', 'WHETHER', 'WHICH',
+    'C1', 'C3', 'C4', 'C7',
+    'C5', 'C2', 'C0', 'C6',
 ]
 
 COMPONENT_MEANINGS = {
-    'WHAT': 'magnitude / amplitude',
-    'HOW': 'rate of change / velocity',
-    'WHO': 'baseline identity / mean level',
-    'HOWMUCH': 'energy / power',
-    'WHEREWHEN': 'phase position / timing',
-    'WHY': 'curvature / acceleration',
-    'WHETHER': 'oscillation pattern / sign changes',
-    'WHICH': 'frequency content / band shape',
-}
-
-COMPONENT_GRAMMAR = {
-    'WHAT': 'content nouns, connective conjunctions (and/also), contrastive (but/however)',
-    'HOW': 'auxiliaries (is/was/can/must), verbs by tense (-ed past, -ing progressive)',
-    'WHO': 'pronouns: subject (I/she), possessive (my/his), object (me/him), reflexive (myself)',
-    'HOWMUCH': 'quantifiers (many/few/all/some/every), numbers, negator (none)',
-    'WHEREWHEN': 'location prepositions (in/on/at), temporal conjunctions (when/before/after)',
-    'WHY': 'causal conjunctions (because/therefore/since/hence/so/thus)',
-    'WHETHER': 'conditionals (if/unless), punctuation (. ! ? , ;), negation (not)',
-    'WHICH': 'selective conjunctions (or/either/neither), interrogative (which)',
+    'C1': 'magnitude / amplitude',
+    'C3': 'rate of change / velocity',
+    'C4': 'baseline identity / mean level',
+    'C7': 'energy / power',
+    'C5': 'phase position / timing',
+    'C2': 'curvature / acceleration',
+    'C0': 'oscillation pattern / sign changes',
+    'C6': 'frequency content / band shape',
 }
 
 

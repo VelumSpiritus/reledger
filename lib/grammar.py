@@ -1,9 +1,9 @@
-"""Grammatical classification of tokens into interrogative components.
+"""Grammatical classification of tokens into structural components.
 
 Functional words are a closed class (Talmy, 2000). Every language carries
-its interrogative system as a closed class, acquired by every child before
-content words. Conjunctions, prepositions, pronouns, determiners,
-auxiliaries: all finite, all classifiable by lookup.
+a finite set of grammatical function words — conjunctions, prepositions,
+pronouns, determiners, auxiliaries — acquired before content words and
+classifiable by lookup.
 
 Open-class words (nouns, verbs, adjectives, adverbs) are classified by
 morphological markers when possible, by position otherwise.
@@ -78,19 +78,19 @@ NEGATORS_BARE = frozenset({
     "not", "barely", "hardly", "scarcely",
 })
 
-NEGATORS_WHO = frozenset({
+NEGATORS_C4 = frozenset({
     "nobody",
 })
 
-NEGATORS_WHAT = frozenset({
+NEGATORS_C1 = frozenset({
     "no", "nothing",
 })
 
-NEGATORS_WHEREWHEN = frozenset({
+NEGATORS_C5 = frozenset({
     "never", "nowhere",
 })
 
-NEGATORS_HOWMUCH = frozenset({
+NEGATORS_C7 = frozenset({
     "none",
 })
 
@@ -162,7 +162,7 @@ _CLOSED_CLASS = (
     | CONJUNCTIONS_CONDITIONAL | CONJUNCTIONS_TEMPORAL | CONJUNCTIONS_SELECTIVE
     | SUBJECT_PRONOUNS | OBJECT_PRONOUNS | POSSESSIVE_PRONOUNS | REFLEXIVE_PRONOUNS
     | DETERMINERS | QUANTIFIERS
-    | NEGATORS_BARE | NEGATORS_WHO | NEGATORS_WHAT | NEGATORS_WHEREWHEN | NEGATORS_HOWMUCH
+    | NEGATORS_BARE | NEGATORS_C4 | NEGATORS_C1 | NEGATORS_C5 | NEGATORS_C7
     | QUESTION_WORDS | LOCATION_PREPOSITIONS | RELATIONAL_PREPOSITIONS
     | DIRECTIONAL_PREPOSITIONS | TEMPORAL_ADVERBS | MANNER_ADVERBS | PLACE_ADVERBS
     | AUXILIARIES | IRREGULAR_PAST
@@ -182,22 +182,22 @@ POSSESSIVE_SUFFIX = "'s"
 
 
 PUNCTUATION_MAP: dict[str, tuple[Component, AssertionPhase]] = {
-    ".": (Component.WHETHER, AssertionPhase.CLOSING),
-    "!": (Component.WHETHER, AssertionPhase.CLOSING),
-    "?": (Component.WHETHER, AssertionPhase.OPENING),
-    ",": (Component.WHETHER, AssertionPhase.ESTABLISHING),
-    ";": (Component.WHETHER, AssertionPhase.CONTRASTING),
-    ":": (Component.WHETHER, AssertionPhase.ESTABLISHING),
-    "—": (Component.WHETHER, AssertionPhase.CONTRASTING),
-    "–": (Component.WHETHER, AssertionPhase.CONTRASTING),
-    "-": (Component.WHETHER, AssertionPhase.CONTRASTING),
-    "(": (Component.WHETHER, AssertionPhase.OPENING),
-    ")": (Component.WHETHER, AssertionPhase.CLOSING),
-    "[": (Component.WHETHER, AssertionPhase.OPENING),
-    "]": (Component.WHETHER, AssertionPhase.CLOSING),
-    '"': (Component.WHETHER, AssertionPhase.OPENING),
-    "'": (Component.WHETHER, AssertionPhase.OPENING),
-    "`": (Component.WHETHER, AssertionPhase.OPENING),
+    ".": (Component.C0, AssertionPhase.CLOSING),
+    "!": (Component.C0, AssertionPhase.CLOSING),
+    "?": (Component.C0, AssertionPhase.OPENING),
+    ",": (Component.C0, AssertionPhase.ESTABLISHING),
+    ";": (Component.C0, AssertionPhase.CONTRASTING),
+    ":": (Component.C0, AssertionPhase.ESTABLISHING),
+    "—": (Component.C0, AssertionPhase.CONTRASTING),
+    "–": (Component.C0, AssertionPhase.CONTRASTING),
+    "-": (Component.C0, AssertionPhase.CONTRASTING),
+    "(": (Component.C0, AssertionPhase.OPENING),
+    ")": (Component.C0, AssertionPhase.CLOSING),
+    "[": (Component.C0, AssertionPhase.OPENING),
+    "]": (Component.C0, AssertionPhase.CLOSING),
+    '"': (Component.C0, AssertionPhase.OPENING),
+    "'": (Component.C0, AssertionPhase.OPENING),
+    "`": (Component.C0, AssertionPhase.OPENING),
 }
 
 
@@ -212,181 +212,161 @@ def classify_token(token: str) -> tuple[Component, AssertionPhase]:
 
     t = token.lower().strip(".,;:!?\"'()[]{}—–-")
     if not t:
-        return Component.WHETHER, AssertionPhase.OPENING
+        return Component.C0, AssertionPhase.OPENING
 
     # Question words → their named component
     if t in {"what"}:
-        return Component.WHAT, AssertionPhase.OPENING
+        return Component.C1, AssertionPhase.OPENING
     if t in {"why"}:
-        return Component.WHY, AssertionPhase.OPENING
+        return Component.C2, AssertionPhase.OPENING
     if t in {"how"}:
-        return Component.HOW, AssertionPhase.OPENING
+        return Component.C3, AssertionPhase.OPENING
     if t in {"who", "whom", "whose"}:
-        return Component.WHO, AssertionPhase.OPENING
+        return Component.C4, AssertionPhase.OPENING
     if t in {"where", "when"}:
-        return Component.WHEREWHEN, AssertionPhase.OPENING
+        return Component.C5, AssertionPhase.OPENING
     if t in {"which"}:
-        return Component.WHICH, AssertionPhase.OPENING
+        return Component.C6, AssertionPhase.OPENING
 
-    # Causal conjunctions → WHY, establishing direction
+    # Causal conjunctions → C2, establishing direction
     if t in CONJUNCTIONS_CAUSAL:
-        return Component.WHY, AssertionPhase.ESTABLISHING
+        return Component.C2, AssertionPhase.ESTABLISHING
 
-    # Connective conjunctions → WHAT, extending coverage
+    # Connective conjunctions → C1, extending coverage
     if t in CONJUNCTIONS_CONNECTIVE:
-        return Component.WHAT, AssertionPhase.ESTABLISHING
+        return Component.C1, AssertionPhase.ESTABLISHING
 
-    # Contrastive → WHAT, exposing the residual
+    # Contrastive → C1, exposing the residual
     if t in CONJUNCTIONS_CONTRASTIVE:
-        return Component.WHAT, AssertionPhase.CONTRASTING
+        return Component.C1, AssertionPhase.CONTRASTING
 
-    # Conditional → WHETHER (yes/no)
+    # Conditional → C0 (binary cut)
     if t in CONJUNCTIONS_CONDITIONAL:
-        return Component.WHETHER, AssertionPhase.OPENING
+        return Component.C0, AssertionPhase.OPENING
 
-    # Temporal → WHEREWHEN
+    # Temporal → C5
     if t in CONJUNCTIONS_TEMPORAL:
-        return Component.WHEREWHEN, AssertionPhase.ESTABLISHING
+        return Component.C5, AssertionPhase.ESTABLISHING
 
-    # Selective → WHICH (resolves underdetermined reference)
+    # Selective → C6 (resolves underdetermined reference)
     if t in CONJUNCTIONS_SELECTIVE:
-        return Component.WHICH, AssertionPhase.OPENING
+        return Component.C6, AssertionPhase.OPENING
 
-    # Pronouns → WHO, decomposed by assertion phase:
+    # Pronouns → C4, decomposed by assertion phase:
     # subject opens, possessive establishes,
     # object contrasts, reflexive closes
     if t in REFLEXIVE_PRONOUNS:
-        return Component.WHO, AssertionPhase.CLOSING
+        return Component.C4, AssertionPhase.CLOSING
     if t in SUBJECT_PRONOUNS:
-        return Component.WHO, AssertionPhase.OPENING
+        return Component.C4, AssertionPhase.OPENING
     if t in POSSESSIVE_PRONOUNS:
-        return Component.WHO, AssertionPhase.ESTABLISHING
+        return Component.C4, AssertionPhase.ESTABLISHING
     if t in OBJECT_PRONOUNS:
-        return Component.WHO, AssertionPhase.CONTRASTING
+        return Component.C4, AssertionPhase.CONTRASTING
 
     # Negation decomposed by instrument class, each at CONTRASTING phase
     if t in NEGATORS_BARE:
-        return Component.WHETHER, AssertionPhase.CONTRASTING
-    if t in NEGATORS_WHO:
-        return Component.WHO, AssertionPhase.CONTRASTING
-    if t in NEGATORS_WHAT:
-        return Component.WHAT, AssertionPhase.CONTRASTING
-    if t in NEGATORS_WHEREWHEN:
-        return Component.WHEREWHEN, AssertionPhase.CONTRASTING
-    if t in NEGATORS_HOWMUCH:
-        return Component.HOWMUCH, AssertionPhase.CONTRASTING
+        return Component.C0, AssertionPhase.CONTRASTING
+    if t in NEGATORS_C4:
+        return Component.C4, AssertionPhase.CONTRASTING
+    if t in NEGATORS_C1:
+        return Component.C1, AssertionPhase.CONTRASTING
+    if t in NEGATORS_C5:
+        return Component.C5, AssertionPhase.CONTRASTING
+    if t in NEGATORS_C7:
+        return Component.C7, AssertionPhase.CONTRASTING
 
-    # Quantifiers → HOWMUCH — check before determiners,
+    # Quantifiers → C7 — check before determiners,
     # since the sets overlap and "many/few/all" are quantifiers first
     if t in QUANTIFIERS:
-        return Component.HOWMUCH, AssertionPhase.ESTABLISHING
+        return Component.C7, AssertionPhase.ESTABLISHING
 
-    # Determiners → WHAT (naming the referent)
+    # Determiners → C1 (naming the referent)
     if t in DETERMINERS:
-        return Component.WHAT, AssertionPhase.ESTABLISHING
+        return Component.C1, AssertionPhase.ESTABLISHING
 
-    # Location prepositions → WHEREWHEN
+    # Location prepositions → C5
     if t in LOCATION_PREPOSITIONS:
-        return Component.WHEREWHEN, AssertionPhase.ESTABLISHING
+        return Component.C5, AssertionPhase.ESTABLISHING
 
-    # Auxiliaries → HOW (process)
+    # Auxiliaries → C3 (process)
     if t in AUXILIARIES:
-        return Component.HOW, AssertionPhase.ESTABLISHING
+        return Component.C3, AssertionPhase.ESTABLISHING
 
-    # Relational prepositions → WHAT (structural relation between covers)
+    # Relational prepositions → C1 (structural relation between covers)
     if t in RELATIONAL_PREPOSITIONS:
-        return Component.WHAT, AssertionPhase.ESTABLISHING
+        return Component.C1, AssertionPhase.ESTABLISHING
 
-    # Directional prepositions → HOW (motion's direction)
+    # Directional prepositions → C3 (motion's direction)
     if t in DIRECTIONAL_PREPOSITIONS:
-        return Component.HOW, AssertionPhase.OPENING
+        return Component.C3, AssertionPhase.OPENING
 
-    # Temporal adverbs → WHEREWHEN
+    # Temporal adverbs → C5
     if t in TEMPORAL_ADVERBS:
-        return Component.WHEREWHEN, AssertionPhase.ESTABLISHING
+        return Component.C5, AssertionPhase.ESTABLISHING
 
-    # Place adverbs → WHEREWHEN
+    # Place adverbs → C5
     if t in PLACE_ADVERBS:
-        return Component.WHEREWHEN, AssertionPhase.ESTABLISHING
+        return Component.C5, AssertionPhase.ESTABLISHING
 
-    # Manner/degree adverbs → HOW (manner)
+    # Manner/degree adverbs → C3 (manner)
     if t in MANNER_ADVERBS:
-        return Component.HOW, AssertionPhase.CONTRASTING
+        return Component.C3, AssertionPhase.CONTRASTING
 
-    # Irregular past tense → HOW (completed motion)
+    # Irregular past tense → C3 (completed motion)
     if t in IRREGULAR_PAST:
-        return Component.HOW, AssertionPhase.CLOSING
+        return Component.C3, AssertionPhase.CLOSING
 
     # --- Open-class heuristics ---
 
     # Possessive suffix on open-class words ("dog's", "researcher's")
     if t.endswith("'s") and len(t) > 2:
-        return Component.WHO, AssertionPhase.ESTABLISHING
+        return Component.C4, AssertionPhase.ESTABLISHING
 
     # Reflexive suffix on open-class words (rare but grammatical)
     if any(t.endswith(s) for s in REFLEXIVE_SUFFIXES) and len(t) > 5:
-        return Component.WHO, AssertionPhase.CLOSING
+        return Component.C4, AssertionPhase.CLOSING
 
-    # Past tense → HOW (completed motion)
+    # Past tense → C3 (completed motion)
     if any(t.endswith(s) for s in PAST_SUFFIXES) and len(t) > 3:
-        return Component.HOW, AssertionPhase.CLOSING
+        return Component.C3, AssertionPhase.CLOSING
 
-    # Progressive → HOW (motion in progress)
+    # Progressive → C3 (motion in progress)
     if t.endswith(PROGRESSIVE_SUFFIX) and len(t) > 4:
-        return Component.HOW, AssertionPhase.ESTABLISHING
+        return Component.C3, AssertionPhase.ESTABLISHING
 
-    # Adverbs (-ly) → HOW (manner)
-    # Guard: "only", "family", "early", "july", "daily", "holy", "assembly",
-    # "supply", "rally", "ally", "tally", "belly", "bully", "lily", "fly",
-    # "apply", "reply", "rely", "imply", "multiply", "ugly", "lonely"
-    # are not manner adverbs — but the guard is length + the suffix appearing
-    # AFTER a recognizable stem, not a blocklist. The minimum reliable form
-    # is 5+ chars where the stem minus -ly has 3+ chars and isn't a noun root.
-    # Simpler: only match -ously, -ively, -ally, -ibly, -ably, -edly, -ingly,
-    # -fully, -lessly — compound adverb suffixes with very low false positive rates.
+    # Adverbs (-ly) → C3 (manner)
     if any(t.endswith(s) for s in (
         "ously", "ively", "ally", "ibly", "ably", "edly",
         "ingly", "fully", "lessly", "arily", "ately",
     )) and len(t) > 5:
-        return Component.HOW, AssertionPhase.CONTRASTING
+        return Component.C3, AssertionPhase.CONTRASTING
 
-    # Nominalizations → WHAT at CLOSING (completed cover)
+    # Nominalizations → C1 at CLOSING (completed cover)
     if any(t.endswith(s) for s in ("tion", "sion", "ment", "ness")) and len(t) > 5:
-        return Component.WHAT, AssertionPhase.CLOSING
+        return Component.C1, AssertionPhase.CLOSING
 
-    # Adjective suffixes → WHAT at CONTRASTING (qualifying the referent)
-    # Compound suffixes with near-zero false positive rates:
-    # -tive (7+): "active", "creative", "positive" — not "give" (4)
-    # -sive (7+): "massive", "passive", "extensive" — not "drive" (5)
+    # Adjective suffixes → C1 at CONTRASTING (qualifying the referent)
     if any(t.endswith(s) for s in ("tive", "sive")) and len(t) > 6:
-        return Component.WHAT, AssertionPhase.CONTRASTING
-    # -ous (6+): reliable ("serious", "famous")
-    # -ful (6+): reliable ("careful", "beautiful")
-    # -ical (6+): reliable ("musical", "political")
+        return Component.C1, AssertionPhase.CONTRASTING
     if any(t.endswith(s) for s in ("ous", "ful", "ical")) and len(t) > 5:
-        return Component.WHAT, AssertionPhase.CONTRASTING
-    # -less (7+): excludes "unless" (6)
-    # -ible (7+): excludes "bible" (5)
-    # -able (7+): excludes "table" (5), "enable" (6)
+        return Component.C1, AssertionPhase.CONTRASTING
     if any(t.endswith(s) for s in ("less", "ible", "able")) and len(t) > 6:
-        return Component.WHAT, AssertionPhase.CONTRASTING
+        return Component.C1, AssertionPhase.CONTRASTING
 
-    # Comparative -er (6+): "bigger", "faster" — not "her" (3), "after" (5)
+    # Comparative -er (6+)
     if t.endswith("er") and len(t) > 5 and not t.endswith("ter"):
-        return Component.WHAT, AssertionPhase.CONTRASTING
-    # Superlative -est (6+): "biggest", "fastest" — not "best" (4), "rest" (4)
+        return Component.C1, AssertionPhase.CONTRASTING
+    # Superlative -est (6+)
     if t.endswith("est") and len(t) > 5:
-        return Component.WHAT, AssertionPhase.CONTRASTING
+        return Component.C1, AssertionPhase.CONTRASTING
 
-    # Third person singular -s on verbs: hard to distinguish from plural nouns
-    # without context, so we leave it to the default (WHAT/ESTABLISHING).
-
-    # Numbers → HOWMUCH
+    # Numbers → C7
     if t.replace(".", "").replace(",", "").isdigit():
-        return Component.HOWMUCH, AssertionPhase.ESTABLISHING
+        return Component.C7, AssertionPhase.ESTABLISHING
 
-    # Default: content words are WHAT (naming the referent)
-    return Component.WHAT, AssertionPhase.ESTABLISHING
+    # Default: content words are C1 (naming the referent)
+    return Component.C1, AssertionPhase.ESTABLISHING
 
 
 def is_open_class(token: str) -> bool:

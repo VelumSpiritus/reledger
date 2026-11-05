@@ -55,21 +55,26 @@ text → tokenize → classify role → 8 component counts per window → (N, 8)
 signal → window → [amplitude, velocity, mean, energy, phase, acceleration, sign-changes, band-shape] → (N, 8)
 ```
 
-## The 8 axes
+## The 8 feature channels
 
-| Component | Grammar (what the bridge reads) | Signal meaning |
-|---|---|---|
-| WHAT | content nouns, connective conjunctions (and/also), contrastive (but/however) | amplitude |
-| HOW | auxiliaries (is/was/can/must), verbs by tense (-ed past, -ing progressive) | velocity |
-| WHO | pronouns: subject (I/she), possessive (my/his), object (me/him), reflexive (myself) | mean level |
-| HOWMUCH | quantifiers (many/few/all/some/every), numbers, negator (none) | energy |
-| WHEREWHEN | location prepositions (in/on/at), temporal conjunctions (when/before/after) | phase |
-| WHY | causal conjunctions (because/therefore/since/hence/so/thus) | acceleration |
-| WHETHER | conditionals (if/unless), punctuation (. ! ? , ;), negation (not) | sign changes |
-| WHICH | selective conjunctions (or/either/neither), interrogative (which) | band shape |
+The engine decomposes each window into 8 orthogonal feature channels.
+For text, each channel captures a distinct closed-class grammatical
+role. For signal data, each channel captures a distinct physical
+measurement. The two bridges produce the same (N, 8) shape by design.
 
-The engine reports all 8 after genre discovery — which axes separate
-the genres and by how much, with the grammatical grounding for each.
+| Channel | Signal meaning |
+|---|---|
+| C1 | amplitude |
+| C2 | velocity |
+| C3 | mean level |
+| C4 | energy |
+| C5 | phase |
+| C6 | acceleration |
+| C7 | sign changes |
+| C8 | band shape |
+
+The engine reports all 8 after genre discovery — which channels
+separate the genres and by how much.
 
 ## How genre discovery works
 
@@ -97,29 +102,28 @@ belong to.
 
 ## The torus
 
-Each token maps to a point on a flat torus T2:
+Each token maps to a point on a flat torus T²:
 
-- **theta_1 (assertion axis):** position in the query cycle —
+- **θ₁ (assertion axis):** position in the query cycle —
   opening, establishing, contrasting, closing
-- **theta_2 (instrument axis):** which of the 8 components
+- **θ₂ (instrument axis):** which of the 8 feature channels
 
-The flat torus embeds isometrically into R4 via the Clifford torus
+The flat torus embeds isometrically into R⁴ via the Clifford torus
 (Clifford, 1873):
 
 ```
-(theta_1, theta_2) -> (cos theta_1, sin theta_1, cos theta_2, sin theta_2) / sqrt(2)
+(θ₁, θ₂) → (cos θ₁, sin θ₁, cos θ₂, sin θ₂) / √2
 ```
 
 Gaussian curvature K = 0. Every point has unit norm.
 
 ## Reliability
 
-The grammatical classifier is a deterministic coding scheme on a
-closed class. Its reliability is measurable with standard inter-rater
-statistics:
+The closed-class classifier is a deterministic coding scheme.
+Its reliability is measurable with standard inter-rater statistics:
 
 - **Cohen's kappa** (Cohen, 1960) — agreement between classifier and
-  human coder, corrected for chance. kappa = 1.0 for closed-class
+  human coder, corrected for chance. κ = 1.0 for closed-class
   lookups by construction.
 - **Krippendorff's alpha** (Krippendorff, 2004) — multiple coders,
   missing data, ordinal/interval scales.
@@ -135,8 +139,8 @@ for witnesses whose genre assignment is equivocal, and reports zero
 when every assignment is clean.
 
 The manifest also carries the residual — what the engine did not
-cover: boundary files sitting between genres, and axes that did not
-contribute to separation.
+cover: boundary files sitting between genres, and channels that did
+not contribute to separation.
 
 ## Rust reference implementations
 

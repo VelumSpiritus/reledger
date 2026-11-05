@@ -1,12 +1,11 @@
-"""Torus embedding — grammatical components to T² coordinates.
+"""Torus embedding — structural components to T² coordinates.
 
 The state space is a flat torus: S¹ × S¹ = T².
 
 Two axes:
     θ₁ (assertion axis): position in the query cycle
         opening → establishing → contrasting → closing
-    θ₂ (instrument axis): which interrogative component
-        whether / what / why / how / who / where-when / which / how-much
+    θ₂ (instrument axis): which structural component (C0–C7)
 
 The torus is intrinsically flat (K ≡ 0). Curvature belongs to the
 embedding, not the object.
@@ -28,7 +27,7 @@ def to_torus(component: Component, phase: AssertionPhase) -> tuple[float, float]
     """Map a classified token to torus coordinates (θ₁, θ₂).
 
     θ₁ = assertion phase angle (position in query cycle)
-    θ₂ = instrument angle (which interrogative component)
+    θ₂ = instrument angle (which structural component)
 
     Both in [0, 2π).
     """
