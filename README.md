@@ -64,14 +64,14 @@ measurement. The two bridges produce the same (N, 8) shape by design.
 
 | Channel | Signal meaning |
 |---|---|
+| C0 | oscillation pattern / sign changes |
 | C1 | amplitude |
-| C2 | velocity |
-| C3 | mean level |
-| C4 | energy |
-| C5 | phase |
-| C6 | acceleration |
-| C7 | sign changes |
-| C8 | band shape |
+| C2 | curvature / acceleration |
+| C3 | rate of change / velocity |
+| C4 | baseline identity / mean level |
+| C5 | phase position / timing |
+| C6 | frequency content / band shape |
+| C7 | energy / power |
 
 The engine reports all 8 after genre discovery — which channels
 separate the genres and by how much.
@@ -87,13 +87,13 @@ separate the genres and by how much.
    candidate k, pick the k whose converged partition has the highest
    silhouette score
 
-The engine implements the recurrence `F(q, E, h, Λ) = (P, q\σ, Λ⁺)`:
-the revolution cycle is F applied repeatedly — output becomes input
-until the partition converges. The reliability measure (Cohen's kappa
-on a perturbed rerun) is ρ₁₂, inter-coder agreement. The adversarial
-check (ρ₃) searches for witnesses — files whose assignment could
-plausibly belong to another genre — and reports zero when none are
-found. Admissibility requires ρ₁₂ ∧ ρ₃ = 0.
+The revolution cycle is a fixed-point iteration: cluster, re-classify
+every window to its nearest centroid, repeat until the partition
+converges. Reliability is measured by Cohen's kappa on a perturbed
+rerun (inter-coder agreement between two independent runs of the same
+hypothesis). A separate adversarial pass searches for witnesses —
+files whose assignment could plausibly belong to another genre — and
+reports zero when none are found.
 
 After discovery, the semantic return aggregates each genre's
 open-class vocabulary — the content words that were set aside during
@@ -132,11 +132,10 @@ The open-class heuristics (suffix-based: `-ed`, `-ing`, `-self`,
 `'s`) are where disagreement lives and where kappa should be
 measured against a human gold standard.
 
-The perturbed-rerun kappa measures ρ₁₂ — agreement between two
-independent applications of the same hypothesis. It does not measure
-ρ₃ (adversarial refutation): a separate pass searches the evidence
-for witnesses whose genre assignment is equivocal, and reports zero
-when every assignment is clean.
+The perturbed-rerun kappa measures agreement between two independent
+applications of the same hypothesis. A separate adversarial pass
+searches the evidence for files whose genre assignment is equivocal,
+and reports zero when every assignment is clean.
 
 The manifest also carries the residual — what the engine did not
 cover: boundary files sitting between genres, and channels that did
