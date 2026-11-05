@@ -80,14 +80,14 @@ separate the genres and by how much.
 
 1. **Softmax encoding** — row-wise softmax converts raw features to
    probability distributions
-2. **Revolution cycle** — agglomerative clustering by Jensen-Shannon
-   divergence, re-classify every window to nearest centroid, repeat
-   until the partition converges
-3. **Natural-k discovery** — run the revolution cycle at each
+2. **Iterative reassignment** — agglomerative clustering by
+   Jensen-Shannon divergence, re-classify every window to nearest
+   centroid, repeat until the partition converges
+3. **Optimal-k selection** — run the reassignment loop at each
    candidate k, pick the k whose converged partition has the highest
    silhouette score
 
-The revolution cycle is a fixed-point iteration: cluster, re-classify
+The reassignment loop is a fixed-point iteration: cluster, re-classify
 every window to its nearest centroid, repeat until the partition
 converges. Reliability is measured by Cohen's kappa on a perturbed
 rerun (inter-coder agreement between two independent runs of the same
@@ -95,18 +95,17 @@ hypothesis). A separate adversarial pass searches for witnesses —
 files whose assignment could plausibly belong to another genre — and
 reports zero when none are found.
 
-After discovery, the semantic return aggregates each genre's
+After discovery, post-hoc labeling aggregates each genre's
 open-class vocabulary — the content words that were set aside during
-classification come back, sorted by which structural genre they
-belong to.
+classification are grouped by which structural genre they belong to.
 
 ## The torus
 
 Each token maps to a point on a flat torus T²:
 
-- **θ₁ (assertion axis):** position in the query cycle —
+- **θ₁ (phase axis):** position in the assertion cycle —
   opening, establishing, contrasting, closing
-- **θ₂ (instrument axis):** which of the 8 feature channels
+- **θ₂ (channel axis):** which of the 8 feature channels
 
 The flat torus embeds isometrically into R⁴ via the Clifford torus
 (Clifford, 1873):
@@ -137,15 +136,14 @@ applications of the same hypothesis. A separate adversarial pass
 searches the evidence for files whose genre assignment is equivocal,
 and reports zero when every assignment is clean.
 
-The manifest also carries the residual — what the engine did not
-cover: boundary files sitting between genres, and channels that did
-not contribute to separation.
+The manifest also reports uncovered cases: boundary files sitting
+between genres, and channels that did not contribute to separation.
 
 ## Rust reference implementations
 
 `lib/torus_fft_eye.rs` and `lib/torus_stream.rs` implement the same
 bridge and discover math in Rust. They compile standalone
-(`rustc lib/torus_fft_eye.rs`) and serve as reference instruments
+(`rustc lib/torus_fft_eye.rs`) and serve as reference implementations
 alongside the Python engine.
 
 ## References
